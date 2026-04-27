@@ -9,8 +9,8 @@
 #' @param protospacers Character vector of 20bp protospacer sequences
 #'     (target sequences). Must be in 5' to 3' direction.
 #' @param pams Character vector of PAM sequences.
-#' @param nuclease String specifying the nuclease. Either "SpCas9" (default)
-#'     or "CasRx".
+#' @param nuclease String specifying the nuclease. Either "SpCas9" (default),
+#'     "SpCas9NG", "CasRx", "SpRY", or "SpRYc".
 #' 
 #' @return \strong{getCFDScores} returns a data.frame with \code{spacer},
 #'     \code{protospacer}, and \code{score} columns. The CFD score takes
@@ -44,7 +44,7 @@
 getCFDScores <- function(spacers,
                          protospacers,
                          pams,
-                         nuclease=c("SpCas9", "CasRx")
+                         nuclease=c("SpCas9", "SpCas9NG", "CasRx", "SpRY", "SpRYc")
 ){
     nuclease <- match.arg(nuclease)
     spacers       <- .checkSequenceInputs(spacers)
@@ -58,10 +58,20 @@ getCFDScores <- function(spacers,
         }
     }
 
-    if (nuclease=="SpCas9"){
+    if (nuclease=="CasRx"){
+        if (unique(nchar(protospacers))>27){
+            stop("Protospacer sequences must have length at most 27nt.")
+        }
+        if (unique(nchar(spacers))>27){
+            stop("Spacer sequences must have length at most 27nt.")
+        }
+        if (unique(nchar(pams))!=1){
+            stop("PAM sequences must have length 1nt.")
+        }
+    } else{
         if (unique(nchar(protospacers))!=20){
             stop("Protospacer sequences must have length 20nt.")
-        } 
+        }
         if (unique(nchar(spacers))!=20){
             stop("Spacer sequences must have length 20nt.")
         }
@@ -69,16 +79,6 @@ getCFDScores <- function(spacers,
             stop("PAM sequences must have length 3nt.")
         }
         pams <- substr(pams,2,3)
-    } else if (nuclease=="CasRx"){
-        if (unique(nchar(protospacers))>27){
-            stop("Protospacer sequences must have length at most27nt.")
-        } 
-        if (unique(nchar(spacers))>27){
-            stop("Spacer sequences must have length at most 27nt.")
-        }
-        if (unique(nchar(pams))!=1){
-            stop("PAM sequences must have length 1nt.")
-        }
     }
    
     spacers.wt  <- spacers
@@ -118,17 +118,30 @@ getCFDScores <- function(spacers,
 .getPamWeights <- function(nuclease){
     if (nuclease=="SpCas9"){
         ws <- cfd.pam.weights.cas9
+    } else if (nuclease=="SpCas9NG"){
+        ws <- cfd.pam.weights.cas9ng
     } else if (nuclease=="CasRx"){
         ws <- cfd.pam.weights.casrx
+    } else if (nuclease=="SpRY"){
+        ws <- cfd.pam.weights.spry
+    } else if (nuclease=="SpRYc"){
+        ws <- cfd.pam.weights.spryc
     }
     return(ws)
 }
 
 .getMmWeights <- function(nuclease){
+    # Cas9-NG, SpRY, and SpRYc re-use the MM weights from WT Cas9
     if (nuclease=="SpCas9"){
+        ws <- cfd.mm.weights.cas9
+    } else if (nuclease=="SpCas9NG"){
         ws <- cfd.mm.weights.cas9
     } else if (nuclease=="CasRx"){
         ws <- cfd.mm.weights.casrx
+    } else if (nuclease=="SpRY"){
+        ws <- cfd.mm.weights.cas9
+    } else if (nuclease=="SpRYc"){
+        ws <- cfd.mm.weights.cas9
     }
     return(ws)
 }

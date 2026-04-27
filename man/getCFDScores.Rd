@@ -4,7 +4,12 @@
 \alias{getCFDScores}
 \title{Calculate CFD off-target specificity scores}
 \usage{
-getCFDScores(spacers, protospacers, pams, nuclease = c("SpCas9", "CasRx"))
+getCFDScores(
+  spacers,
+  protospacers,
+  pams,
+  nuclease = c("SpCas9", "SpCas9-NG", "CasRx", "SpRY", "SpRYc")
+)
 }
 \arguments{
 \item{spacers}{Character vector of 20bp spacer sequences.
@@ -17,8 +22,8 @@ For CasRx, must be at most of length 27bp.}
 
 \item{pams}{Character vector of PAM sequences.}
 
-\item{nuclease}{String specifying the nuclease. Either "SpCas9" (default)
-or "CasRx".}
+\item{nuclease}{String specifying the nuclease. Either "SpCas9" (default),
+"SpCas9-NG", "CasRx", "SpRY", or "SpRYc".}
 }
 \value{
 \strong{getCFDScores} returns a data.frame with \code{spacer},
